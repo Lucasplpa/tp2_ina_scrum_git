@@ -79,3 +79,48 @@ jupyter notebook notebooks/TP2_Churn_Regresion_Logistica.ipynb
 Dentro de Jupyter: **Kernel → Restart & Run All**. El notebook lee el dataset desde `../data/Telco_Customer_Churn.csv`, así que hay que abrirlo desde la carpeta `notebooks/` (como en el paso 4).
 
 **Alternativa sin instalar nada:** subir el notebook y el CSV a [Google Colab](https://colab.research.google.com/), dejar ambos archivos en la misma carpeta y cambiar la ruta de lectura a `'Telco_Customer_Churn.csv'`.
+
+## 5. Capturas y ejemplos de resultados
+
+### Distribución de la variable objetivo
+Las clases están desbalanceadas: el 73,46 % de los clientes permanece y el 26,54 % abandona. Un modelo que respondiera siempre "No abandona" acertaría el 73,46 %: esa es la **línea base** que hay que superar.
+
+![Distribución de clientes que permanecieron y abandonaron](img/01_distribucion_churn.png)
+
+### Antigüedad y cargo mensual según abandono
+Quienes abandonan llevan **menos tiempo** en la empresa y pagan **más por mes**.
+
+![Boxplots de antigüedad y cargo mensual](img/02_variables_numericas.png)
+
+### Porcentaje de abandono por categoría
+El abandono es mucho mayor con **contrato mes a mes** (42,7 % contra 2,8 % en contratos de dos años), **fibra óptica**, **sin soporte técnico ni seguridad en línea** y **pago con cheque electrónico**.
+
+![Tasa de abandono por categoría](img/03_tasa_abandono_por_categoria.png)
+
+### Resultados del modelo
+
+```
+Exactitud en prueba:        79.84%   (1.125 aciertos de 1.409 clientes)
+Exactitud en entrenamiento: 79.84%   → no hay sobreajuste
+Línea base (siempre "No"):  73.46%   → el modelo la supera en 6,4 puntos
+
+Abandonaron y el modelo predijo que NO:     171
+No abandonaron y el modelo predijo que SÍ:  113
+Abandonos detectados:                       203 de 374 (54 %)
+```
+
+Ejemplos de predicciones sobre clientes del conjunto de prueba:
+
+| Registro | Antigüedad | Contrato | Internet | Prob. abandono | Real | Predicción | Resultado |
+|---|---|---|---|---|---|---|---|
+| 3524 | 11 meses | Mes a mes | Fibra óptica | 0,62 | Abandonó | Abandonó | ✅ Correcta |
+| 437 | 72 meses | Dos años | Fibra óptica | 0,04 | No abandonó | No abandonó | ✅ Correcta |
+| 1639 | 17 meses | Mes a mes | DSL | 0,45 | Abandonó | No abandonó | ❌ Falso negativo |
+| 2280 | 8 meses | Mes a mes | Fibra óptica | 0,58 | No abandonó | Abandonó | ❌ Falso positivo |
+
+## 6. Conclusiones personales
+
+- **El problema va antes que el código.** Entender qué significa "abandonar" para el negocio y por qué importa más detectar a quien se va que acertar en general cambió la forma en que evalué el modelo: el 79,84 % de exactitud se ve bien, pero detecta solo el 54 % de los abandonos.
+- **Explorar los datos evita errores silenciosos.** `isnull()` no mostraba faltantes, pero `TotalCharges` tenía 11 espacios en blanco. Revisar tipos de datos y casos puntuales fue tan importante como entrenar el modelo.
+- **Siempre hay que compararse con una línea base.** Sin el 73,46 % de "responder siempre No", el resultado no tiene contexto.
+- **Un modelo simple e interpretable también sirve.** La regresión logística no da solo una clase: da una probabilidad, y eso permite priorizar acciones de retención.
